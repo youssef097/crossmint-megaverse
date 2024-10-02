@@ -48,7 +48,7 @@ Interactive menu system using `prompts`library to guide users through available 
 Clone the project
 
 ```bash
-  git clone https://github.com/youssef097/crossmint-megaverse.git
+  git clone https://github.com/youssef097/crossmint-metaverse.git
 ```
 
 Clone the `.env.example` file and rename it `.env`
@@ -56,7 +56,7 @@ Clone the `.env.example` file and rename it `.env`
 Go to the project directory
 
 ```bash
-  cd crossmint-megaverse
+  cd crossmint-metaverse
 ```
 
 Install dependencies
