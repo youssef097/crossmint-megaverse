@@ -103,7 +103,7 @@ export class MegaverseService {
             return !existingObject;
         });
 
-        console.log(`[Info] Creating ${objectsToCreate.length} new objects...`);
+        console.log(`[ℹ️ ] Creating ${objectsToCreate.length} new objects...`);
         for (const astralObject of objectsToCreate) {
             await this.createObject(astralObject);
             this.createdObjects++;
@@ -157,19 +157,19 @@ export class MegaverseService {
     }
 
     public async clearCurrentMap(): Promise<void> {
-        console.log("[Info] Clearing Megaverse...");
+        console.log("[ℹ️ ] Clearing Megaverse...");
 
         const currentAstralObjects = await this.getCurrentAstralObjects();
 
         if (!currentAstralObjects.length) {
             console.log(
-                `[Info] No elements found in the current megaverse, skipping...`,
+                `[ℹ️ ] No elements found in the current megaverse, skipping...`,
             );
             return;
         }
 
         console.log(
-            `[Info] Clearing ${currentAstralObjects.length} elements from the current megaverse...`,
+            `[ℹ️ ] Clearing ${currentAstralObjects.length} elements from the current megaverse...`,
         );
         for (const { position, type } of currentAstralObjects) {
             await this.deleteObject(position, type);
@@ -179,19 +179,19 @@ export class MegaverseService {
     }
 
     public async deleteIntrusiveObjects(): Promise<void> {
-        console.log("[Info] Deletign intrusive objects...");
+        console.log("[ℹ️ ] Deletign intrusive objects...");
 
         const currentAstralObjects = await this.getCurrentAstralObjects();
 
         if (!currentAstralObjects.length) {
             console.log(
-                `[Info] No elements found in the current megaverse, skipping...`,
+                `[ℹ️ ] No elements found in the current megaverse, skipping...`,
             );
             return;
         }
 
         console.log(
-            `[Info] Clearing ${this.intrusiveObjects.length} elements from the current megaverse...`,
+            `[ℹ️ ] Clearing ${this.intrusiveObjects.length} elements from the current megaverse...`,
         );
         for (const { position, type } of this.intrusiveObjects) {
             await this.deleteObject(position, type);
@@ -200,7 +200,7 @@ export class MegaverseService {
     }
 
     public async getCurrentAstralObjects(): Promise<AstralObject[]> {
-        console.log("[info] getting current astral object...");
+        console.log("[ℹ️ ] getting current astral object...");
 
         const currentMap: (AstralObject | null)[][] =
             await this.getCurrentMap();
