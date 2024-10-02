@@ -14,8 +14,6 @@ abstract class AstralObjectService {
         position: IPosition,
         extraParams?: Record<string, any>,
     ): Promise<void> {
-        console.log(position);
-
         const url = `/${AstralObjectEndoints[this.getObjectType()]}`;
         const params = {
             ...position,
@@ -55,10 +53,14 @@ export class SoloonService extends AstralObjectService {
     }
 
     async createSoloon(position: IPosition, color: string): Promise<void> {
+        console.log("[🌕] Creating polyanet in position", position);
+
         return await this.createObject(position, { color });
     }
 
     async deleteSoloon(position: IPosition): Promise<void> {
+        console.log("[🌕] Deleting Soloon in position", position);
+
         await this.deleteObject(position);
     }
 }
@@ -69,10 +71,14 @@ export class ComethService extends AstralObjectService {
     }
 
     async createCometh(position: IPosition, direction: string): Promise<void> {
+        console.log("[☄️ ] Creating Cometh in position", position);
+
         await this.createObject(position, { direction });
     }
 
     async deleteCometh(position: IPosition): Promise<void> {
+        console.log("[☄️ ] Deleting Cometh in position", position);
+
         await this.deleteObject(position);
     }
 }

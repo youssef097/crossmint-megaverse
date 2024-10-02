@@ -1,20 +1,14 @@
-import { metaverse } from "src/services/Metaverse";
-
+// import { drawXShape } from "@utils/drawXShape";
 import dotenv from "dotenv";
-
 dotenv.config();
 
+import { megaverse } from "src/services/Megaverse";
+
 (async () => {
-    console.log("[MAIN] Metaverse started");
-
-    await metaverse.clearCurrentMap();
-    console.log("[MAIN] Metaverse cleared succesfully!");
-
-    // const result = await metaverse.getGoalMap();
-
-    // const result = await metaverse.getCurrentAstralObjects();
-
-    // console.log(result);
-
-    await metaverse.createMetaverseFromGoal();
+    try {
+        await megaverse.clearCurrentMap();
+        await megaverse.createMetaverseFromGoal();
+    } catch (error) {
+        console.error("[‼️]Error creating megaverse:", error);
+    }
 })();

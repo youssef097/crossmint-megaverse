@@ -7,13 +7,15 @@ import {
 import { MapService } from "src/services/MapService";
 import { AstralObject, AstralObjectType, IPosition } from "src/types";
 
-export class MetaverseService {
+export class MegaverseService {
     private polyanetService: PolyanetService;
     private soloonService: SoloonService;
     private comethService: ComethService;
     private mapService: MapService;
 
     constructor(candidateId: string) {
+        console.log("💥 MEGAVERSE CREATED 💥");
+
         this.polyanetService = new PolyanetService(candidateId);
         this.soloonService = new SoloonService(candidateId);
         this.comethService = new ComethService(candidateId);
@@ -24,7 +26,6 @@ export class MetaverseService {
         const goalMap: AstralObject[] = await this.getGoalMap();
         for (let i = 0; i < goalMap.length; i++) {
             const astralObject = goalMap[i];
-            console.log(astralObject);
 
             switch (astralObject.type) {
                 case AstralObjectType.COMETH:
@@ -49,15 +50,16 @@ export class MetaverseService {
 
         if (!currentAstralObjects.length) {
             console.log(
-                `[Info] Found ${currentAstralObjects.length} elements in current metaverse, skipping...`,
+                `[Info] Found ${currentAstralObjects.length} elements in current megaverse, skipping...`,
             );
             return;
         }
         console.log(
-            `[Info] Found ${currentAstralObjects.length} elements in current metaverse, clearing...`,
+            `[Info] Found ${currentAstralObjects.length} elements in current megaverse, clearing...`,
         );
         for (const { position, type } of currentAstralObjects) {
             const { row, column } = position;
+
             switch (type) {
                 case AstralObjectType.POLYANET:
                     await this.deletePolyanet({ column, row });
@@ -106,6 +108,16 @@ export class MetaverseService {
         return result;
     }
 
+    async getGoalMap(): Promise<AstralObject[]> {
+        const goal = await this.mapService.getGoalMap();
+        return normalizeMap(goal, typeMap);
+    }
+
+    async getCurrentMap(): Promise<any> {
+        const current = await this.mapService.getCurrentMap();
+        return current;
+    }
+
     async createPolyanet({ position }: AstralObject): Promise<void> {
         await this.polyanetService.createPolyanet(position);
     }
@@ -115,7 +127,6 @@ export class MetaverseService {
             position,
             extraParams!.color,
         );
-
         return result;
     }
 
@@ -134,15 +145,6 @@ export class MetaverseService {
     async deleteCometh(position: IPosition): Promise<void> {
         await this.comethService.deleteCometh(position);
     }
-
-    async getGoalMap(): Promise<AstralObject[]> {
-        const goal = await this.mapService.getGoalMap();
-        return normalizeMap(goal, typeMap);
-    }
-    async getCurrentMap(): Promise<any> {
-        const current = await this.mapService.getCurrentMap();
-        return current;
-    }
 }
 
-export const metaverse = new MetaverseService(process.env.CANDIDATE_ID!);
+export const megaverse = new MegaverseService(process.env.CANDIDATE_ID!);

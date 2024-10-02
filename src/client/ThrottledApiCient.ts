@@ -1,7 +1,7 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
-import dotenv from "dotenv";
+// import dotenv from "dotenv";
 
-dotenv.config();
+// dotenv.config();
 
 class ThrottledAxiosClient {
     private axiosInstance: AxiosInstance;
@@ -11,8 +11,9 @@ class ThrottledAxiosClient {
     private interval: NodeJS.Timeout | null = null;
 
     constructor(baseURL: string, maxRequestsPerSecond = 3) {
-        console.log("Instantiation");
-
+        console.log(
+            `⏳ Throtling started with a maximum of ${maxRequestsPerSecond} requests per second`,
+        );
         this.axiosInstance = axios.create({
             baseURL,
         });
@@ -50,7 +51,9 @@ class ThrottledAxiosClient {
             try {
                 return await fn();
             } catch (error) {
-                console.error(`Attempt ${attempt} failed: ${error}`);
+                console.error(
+                    `[❌] Attempt ${attempt}. 🌌 Looks like we've hit a cosmic speed bump! Retrying... 🚀`,
+                );
                 if (attempt < retries) {
                     await new Promise((res) => setTimeout(res, delayMs));
                 } else {
@@ -111,5 +114,5 @@ class ThrottledAxiosClient {
 
 export const throttledClient = new ThrottledAxiosClient(
     process.env.API_URL!,
-    10,
+    Number(process.env.MAX_REQUEST_PER_SECOND) ?? 2,
 );

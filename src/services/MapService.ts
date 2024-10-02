@@ -1,10 +1,4 @@
 import { throttledClient } from "@client/ThrottledApiCient";
-import { typeMap } from "@utils/index";
-import dotenv from "dotenv";
-import { AstralObject } from "src/types";
-
-dotenv.config();
-
 export class MapService {
     private candidateId: string;
 
