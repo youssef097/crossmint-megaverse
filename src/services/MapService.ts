@@ -20,4 +20,12 @@ export class MapService {
 
         return response.data.map.content;
     }
+
+    async validate(): Promise<boolean> {
+        const response = await throttledClient.post(
+            `${process.env.API_URL}/map/${this.candidateId}/validate`,
+        );
+
+        return response.data.solved;
+    }
 }

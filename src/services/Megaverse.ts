@@ -1,11 +1,12 @@
-import { normalizeMap, typeMap } from "@utils/index";
+import { normalizeMap } from "@utils/index";
 import {
     PolyanetService,
     SoloonService,
     ComethService,
+    AstralObjectService,
 } from "src/services/AstralObject";
 import { MapService } from "src/services/MapService";
-import { AstralObject, AstralObjectType, IPosition } from "src/types";
+import { AstralObject, AstralObjectType, IPosition, typeMap } from "src/types";
 
 export class MegaverseService {
     private polyanetService: PolyanetService;
@@ -13,8 +14,12 @@ export class MegaverseService {
     private comethService: ComethService;
     private mapService: MapService;
 
+    private totalObjects: number = 0;
+    private createdObjects: number = 0;
+    private intrusiveObjects: AstralObject[] = [];
+
     constructor(candidateId: string) {
-        console.log("💥 MEGAVERSE CREATED 💥");
+        console.log("💥 MEGAVERSE INITIATED 💥");
 
         this.polyanetService = new PolyanetService(candidateId);
         this.soloonService = new SoloonService(candidateId);
@@ -22,67 +27,183 @@ export class MegaverseService {
         this.mapService = new MapService(candidateId);
     }
 
-    async createMetaverseFromGoal(): Promise<void> {
-        const goalMap: AstralObject[] = await this.getGoalMap();
-        for (let i = 0; i < goalMap.length; i++) {
-            const astralObject = goalMap[i];
-
-            switch (astralObject.type) {
-                case AstralObjectType.COMETH:
-                    await this.createCometh(astralObject);
-                    break;
-                case AstralObjectType.SOLOON:
-                    await this.createSoloon(astralObject);
-                    break;
-                case AstralObjectType.POLYANET:
-                    await this.createPolyanet(astralObject);
-                    break;
-                default:
-                    break;
-            }
+    private getServiceByType(type: AstralObjectType): AstralObjectService {
+        switch (type) {
+            case AstralObjectType.POLYANET:
+                return this.polyanetService;
+            case AstralObjectType.SOLOON:
+                return this.soloonService;
+            case AstralObjectType.COMETH:
+                return this.comethService;
+            default:
+                throw new Error(`Unsupported type: ${type}`);
         }
     }
 
-    async clearCurrentMap() {
+    private async createObject(astralObject: AstralObject): Promise<void> {
+        const { type, position, extraParams } = astralObject;
+
+        switch (type) {
+            case AstralObjectType.POLYANET:
+                await this.polyanetService.createPolyanet(position);
+                break;
+            case AstralObjectType.SOLOON:
+                await this.soloonService.createSoloon(
+                    position,
+                    extraParams!.color,
+                );
+                break;
+            case AstralObjectType.COMETH:
+                await this.comethService.createCometh(
+                    position,
+                    extraParams!.direction,
+                );
+                break;
+        }
+    }
+
+    public async deleteObject(
+        position: IPosition,
+        type: AstralObjectType,
+    ): Promise<void> {
+        switch (type) {
+            case AstralObjectType.POLYANET:
+                await this.polyanetService.deletePolyanet(position);
+                break;
+            case AstralObjectType.SOLOON:
+                await this.soloonService.deleteSoloon(position);
+                break;
+            case AstralObjectType.COMETH:
+                await this.comethService.deleteCometh(position);
+                break;
+        }
+    }
+
+    async createMetaverseFromGoal(): Promise<void> {
+        const currentMap: AstralObject[] = await this.getCurrentAstralObjects();
+        const goalMap: AstralObject[] = await this.getGoalMap();
+
+        this.totalObjects = goalMap.length;
+        this.createdObjects = currentMap.length;
+
+        for (const intrusiveObject of this.intrusiveObjects) {
+            await this.deleteObject(
+                intrusiveObject.position,
+                intrusiveObject.type,
+            );
+            this.createdObjects--;
+            this.getPercentageProgress();
+        }
+
+        const objectsToCreate = goalMap.filter((goalObject) => {
+            const service = this.getServiceByType(goalObject.type);
+            const existingObject = currentMap.find((currentObject) =>
+                service.isEqual(currentObject, goalObject),
+            );
+            return !existingObject;
+        });
+
+        console.log(`[Info] Creating ${objectsToCreate.length} new objects...`);
+        for (const astralObject of objectsToCreate) {
+            await this.createObject(astralObject);
+            this.createdObjects++;
+            this.getPercentageProgress();
+        }
+    }
+
+    public async loadProgress(): Promise<void> {
+        const currentMap: AstralObject[] = await this.getCurrentAstralObjects();
+        const goalMap: AstralObject[] = await this.getGoalMap();
+
+        this.intrusiveObjects = currentMap.filter((currentObject) => {
+            const service = this.getServiceByType(currentObject.type);
+            const isInGoalMap = goalMap.find((goalObject) =>
+                service.isEqual(goalObject, currentObject),
+            );
+            return !isInGoalMap;
+        });
+
+        console.log(
+            `[⛔️] Found ${this.intrusiveObjects.length} intrusive astral objects`,
+        );
+
+        this.totalObjects = goalMap.length;
+        this.createdObjects = currentMap.length - this.intrusiveObjects.length;
+    }
+
+    public getPercentageProgress(isDeletionProgress = false) {
+        const adjustedCreatedObjects = isDeletionProgress
+            ? this.createdObjects + this.intrusiveObjects.length
+            : this.createdObjects;
+
+        const progressPercentage =
+            (adjustedCreatedObjects / this.totalObjects) * 100;
+
+        if (isDeletionProgress) {
+            console.log(
+                `[🗑️] ${this.totalObjects - adjustedCreatedObjects}/${
+                    this.totalObjects
+                } planets deleted (${(100 - progressPercentage).toFixed(2)}%)`,
+            );
+            return 100 - progressPercentage;
+        } else {
+            console.log(
+                `[✨] ${adjustedCreatedObjects}/${
+                    this.totalObjects
+                } planets created (${progressPercentage.toFixed(2)}%)`,
+            );
+            return progressPercentage;
+        }
+    }
+
+    public async clearCurrentMap(): Promise<void> {
         console.log("[Info] Clearing Metaverse...");
 
         const currentAstralObjects = await this.getCurrentAstralObjects();
 
         if (!currentAstralObjects.length) {
             console.log(
-                `[Info] Found ${currentAstralObjects.length} elements in current megaverse, skipping...`,
+                `[Info] No elements found in the current megaverse, skipping...`,
             );
             return;
         }
+
         console.log(
-            `[Info] Found ${currentAstralObjects.length} elements in current megaverse, clearing...`,
+            `[Info] Clearing ${currentAstralObjects.length} elements from the current megaverse...`,
         );
         for (const { position, type } of currentAstralObjects) {
-            const { row, column } = position;
-
-            switch (type) {
-                case AstralObjectType.POLYANET:
-                    await this.deletePolyanet({ column, row });
-                    break;
-                case AstralObjectType.SOLOON:
-                    await this.deleteSoloon({ column, row });
-                    break;
-                case AstralObjectType.COMETH:
-                    await this.deleteCometh({ column, row });
-                    break;
-
-                default:
-                    // console.log(` Type ${type} not found`);
-                    break;
-            }
+            await this.deleteObject(position, type);
+            this.createdObjects--;
+            this.getPercentageProgress(true);
         }
     }
 
-    async getCurrentAstralObjects(): Promise<AstralObject[]> {
+    public async deleteIntrusiveObjects(): Promise<void> {
+        console.log("[Info] Deletign intrusive objects...");
+
+        const currentAstralObjects = await this.getCurrentAstralObjects();
+
+        if (!currentAstralObjects.length) {
+            console.log(
+                `[Info] No elements found in the current megaverse, skipping...`,
+            );
+            return;
+        }
+
+        console.log(
+            `[Info] Clearing ${this.intrusiveObjects.length} elements from the current megaverse...`,
+        );
+        for (const { position, type } of this.intrusiveObjects) {
+            await this.deleteObject(position, type);
+            this.getPercentageProgress();
+        }
+    }
+
+    public async getCurrentAstralObjects(): Promise<AstralObject[]> {
         console.log("[info] getting current astral object...");
 
         const currentMap: (AstralObject | null)[][] =
-            await this.getCurrentMap(); // Define the map as holding AstralObject or null
+            await this.getCurrentMap();
 
         const result: AstralObject[] = [];
 
@@ -108,42 +229,23 @@ export class MegaverseService {
         return result;
     }
 
-    async getGoalMap(): Promise<AstralObject[]> {
+    public async getGoalMap(): Promise<AstralObject[]> {
         const goal = await this.mapService.getGoalMap();
         return normalizeMap(goal, typeMap);
     }
 
-    async getCurrentMap(): Promise<any> {
-        const current = await this.mapService.getCurrentMap();
-        return current;
+    public async getCurrentMap(): Promise<any> {
+        return await this.mapService.getCurrentMap();
     }
 
-    async createPolyanet({ position }: AstralObject): Promise<void> {
-        await this.polyanetService.createPolyanet(position);
-    }
-
-    async createSoloon({ position, extraParams }: AstralObject): Promise<void> {
-        const result = await this.soloonService.createSoloon(
-            position,
-            extraParams!.color,
-        );
+    public async validate(): Promise<boolean> {
+        console.log("[⏳] Validating your megaverse");
+        const result = await this.mapService.validate();
         return result;
     }
 
-    async createCometh({ position, extraParams }: AstralObject): Promise<void> {
-        await this.comethService.createCometh(position, extraParams!.direction);
-    }
-
-    async deletePolyanet(position: IPosition): Promise<void> {
-        await this.polyanetService.deletePolyanet(position);
-    }
-
-    async deleteSoloon(position: IPosition): Promise<void> {
-        await this.soloonService.deleteSoloon(position);
-    }
-
-    async deleteCometh(position: IPosition): Promise<void> {
-        await this.comethService.deleteCometh(position);
+    get getIntrusiveAstralObjects(): AstralObject[] {
+        return this.intrusiveObjects;
     }
 }
 

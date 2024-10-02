@@ -34,3 +34,42 @@ export enum SoloonColor {
     BLUE = "blue",
     WHITE = "white",
 }
+
+export const typeMap: Record<
+    string,
+    { type: number; extraParams?: Record<string, any> }
+> = {
+    POLYANET: { type: AstralObjectType.POLYANET },
+    BLUE_SOLOON: {
+        type: AstralObjectType.SOLOON,
+        extraParams: { color: SoloonColor.BLUE },
+    },
+    RED_SOLOON: {
+        type: AstralObjectType.SOLOON,
+        extraParams: { color: SoloonColor.RED },
+    },
+    PURPLE_SOLOON: {
+        type: AstralObjectType.SOLOON,
+        extraParams: { color: SoloonColor.PURPLE },
+    },
+    WHITE_SOLOON: {
+        type: AstralObjectType.SOLOON,
+        extraParams: { color: SoloonColor.WHITE },
+    },
+    UP_COMETH: {
+        type: AstralObjectType.COMETH,
+        extraParams: { direction: ComethDirection.UP },
+    },
+    DOWN_COMETH: {
+        type: AstralObjectType.COMETH,
+        extraParams: { direction: ComethDirection.DOWN },
+    },
+    LEFT_COMETH: {
+        type: AstralObjectType.COMETH,
+        extraParams: { direction: ComethDirection.LEFT },
+    },
+    RIGHT_COMETH: {
+        type: AstralObjectType.COMETH,
+        extraParams: { direction: ComethDirection.RIGHT },
+    },
+};

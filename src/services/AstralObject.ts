@@ -1,7 +1,12 @@
 import { throttledClient } from "@client/ThrottledApiCient";
-import { AstralObjectEndoints, AstralObjectType, IPosition } from "src/types";
+import {
+    AstralObject,
+    AstralObjectEndoints,
+    AstralObjectType,
+    IPosition,
+} from "src/types";
 
-abstract class AstralObjectService {
+export abstract class AstralObjectService {
     protected candidateId: string;
 
     constructor(candidateId: string) {
@@ -27,6 +32,34 @@ abstract class AstralObjectService {
         const url = `/${AstralObjectEndoints[this.getObjectType()]}`;
         const params = { ...position, candidateId: this.candidateId };
         await throttledClient.delete(url, { data: params });
+    }
+
+    public isEqual(
+        currentObject: AstralObject,
+        goalObject: AstralObject,
+    ): boolean {
+        if (
+            currentObject.position.row !== goalObject.position.row ||
+            currentObject.position.column !== goalObject.position.column ||
+            currentObject.type !== goalObject.type
+        ) {
+            return false;
+        }
+
+        switch (goalObject.type) {
+            case AstralObjectType.COMETH:
+                return (
+                    currentObject.extraParams?.direction ===
+                    goalObject.extraParams?.direction
+                );
+            case AstralObjectType.SOLOON:
+                return (
+                    currentObject.extraParams?.color ===
+                    goalObject.extraParams?.color
+                );
+            default:
+                return true;
+        }
     }
 }
 

@@ -1,7 +1,4 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
-// import dotenv from "dotenv";
-
-// dotenv.config();
 
 class ThrottledAxiosClient {
     private axiosInstance: AxiosInstance;

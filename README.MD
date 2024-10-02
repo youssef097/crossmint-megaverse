@@ -14,21 +14,35 @@ The number request per second can be set through the environment variable
 
 
 
-### Execution Flow
+## Features
 
-Each time the project is executed, it will first clear the existing elements from the current map and then proceed to construct the metaverse according to the goal map.
+#### 1. Create Megaverse from Goal Map
+Initiate the creation of a megaverse based on a predefined goal map.
+
+ [⚠️] will clear the current progress if needed
+
+#### 2. Continue Megaverse Creation
+Resume the megaverse creation process if interrupted, allowing for partial completion of the creation.
+
+#### 3. Validate Megaverse
+Validate the current state of the megaverse to ensure it meets predefined criteria making use of the `/validate` API endpoint  .
+
+
+#### 4. Clear Current Map
+Remove all existing objects from the current map, providing a fresh start for new creations.
+
+#### 5. Delete Intrusive Astral Objects
+Identify and remove any objects that are not recognized in the goal map.
+
+#### 6. Progress Tracking
+Real-time tracking of the creation process with percentage completion displayed to the user. Informative messages indicate the current status of the megaverse action.
+
+
+#### 7. User-Friendly Menu Interface
+Interactive menu system using `prompts`library to guide users through available actions.
 
 
 
-## Environment Variables
-
-To run this project, you will need to add the following environment variables to your .env file
-
-`CANDIDATE_ID=` 
-
-`BASE_API_URL=`
-
-`MAX_REQUESTS_PER_SECOND = 3 #recommended` 
 
 
 ## Run Locally
@@ -38,6 +52,8 @@ Clone the project
 ```bash
   git clone https://github.com/youssef097/crossmint-metaverse.git
 ```
+
+Clone the `.env.example` file and rename it `.env`
 
 Go to the project directory
 
@@ -57,8 +73,18 @@ Start the process
   npm run start
 ```
 
+## Environment Variables
+
+To run this project, you will need to add the following environment variables to your .env file
+
+`CANDIDATE_ID=` 
+
+`BASE_API_URL=`
+
+`MAX_REQUESTS_PER_SECOND = 3 #recommended` 
+
 
 ## Tech Stack
 
- NodeJS, Axios
+ NodeJS, Axios, Prompts, Typescript
 
