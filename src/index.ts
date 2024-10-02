@@ -8,8 +8,13 @@ dotenv.config();
     console.log("[MAIN] Metaverse started");
 
     await metaverse.clearCurrentMap();
+    console.log("[MAIN] Metaverse cleared succesfully!");
+
+    // const result = await metaverse.getGoalMap();
+
+    // const result = await metaverse.getCurrentAstralObjects();
+
+    // console.log(result);
 
     await metaverse.createMetaverseFromGoal();
-
-    console.log("[MAIN] Metaverse generated succesfully!");
 })();

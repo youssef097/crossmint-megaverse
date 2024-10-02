@@ -1,10 +1,11 @@
+import { normalizeMap, typeMap } from "@utils/index";
 import {
     PolyanetService,
     SoloonService,
     ComethService,
 } from "src/services/AstralObject";
 import { MapService } from "src/services/MapService";
-import { ComethDirection, IPosition, SoloonColor } from "src/types";
+import { AstralObject, AstralObjectType, IPosition } from "src/types";
 
 export class MetaverseService {
     private polyanetService: PolyanetService;
@@ -20,51 +21,23 @@ export class MetaverseService {
     }
 
     async createMetaverseFromGoal(): Promise<void> {
-        const goalMap = await this.getGoalMap();
+        const goalMap: AstralObject[] = await this.getGoalMap();
+        for (let i = 0; i < goalMap.length; i++) {
+            const astralObject = goalMap[i];
+            console.log(astralObject);
 
-        for (let row = 0; row < goalMap.length; row++) {
-            for (let column = 0; column < goalMap[row].length; column++) {
-                const objectType = goalMap[row][column];
-                const position: IPosition = { row, column };
-
-                switch (objectType) {
-                    case "POLYANET":
-                        await this.createPolyanet(position);
-                        break;
-                    case "BLUE_SOLOON":
-                        await this.createSoloon(position, SoloonColor.BLUE);
-                        break;
-                    case "RED_SOLOON":
-                        await this.createSoloon(position, SoloonColor.RED);
-                        break;
-                    case "PURPLE_SOLOON":
-                        await this.createSoloon(position, SoloonColor.PURPLE);
-                        break;
-                    case "WHITE_SOLOON":
-                        await this.createSoloon(position, SoloonColor.WHITE);
-                        break;
-                    case "UP_COMETH":
-                        await this.createCometh(position, ComethDirection.UP);
-                        break;
-                    case "DOWN_COMETH":
-                        await this.createCometh(position, ComethDirection.DOWN);
-                        break;
-                    case "LEFT_COMETH":
-                        await this.createCometh(position, ComethDirection.LEFT);
-                        break;
-                    case "RIGHT_COMETH":
-                        await this.createCometh(
-                            position,
-                            ComethDirection.RIGHT,
-                        );
-                        break;
-                    default:
-                        // console.log(
-                        //     objectType,
-                        //     `No object to place at row ${row}, column ${column}`,
-                        // );
-                        break;
-                }
+            switch (astralObject.type) {
+                case AstralObjectType.COMETH:
+                    await this.createCometh(astralObject);
+                    break;
+                case AstralObjectType.SOLOON:
+                    await this.createSoloon(astralObject);
+                    break;
+                case AstralObjectType.POLYANET:
+                    await this.createPolyanet(astralObject);
+                    break;
+                default:
+                    break;
             }
         }
     }
@@ -85,16 +58,14 @@ export class MetaverseService {
         );
         await Promise.all(
             currentAstralObjects.map(
-                async (aO: { type: number; column: number; row: number }) => {
-                    const { row, column } = aO;
-                    switch (aO.type) {
-                        case 0:
+                async ({ position, type }: AstralObject) => {
+                    const { row, column } = position;
+                    switch (type) {
+                        case AstralObjectType.POLYANET:
                             return await this.deletePolyanet({ column, row });
-
-                        case 1:
+                        case AstralObjectType.SOLOON:
                             return await this.deleteSoloon({ column, row });
-
-                        case 2:
+                        case AstralObjectType.COMETH:
                             return await this.deleteCometh({ column, row });
 
                         default:
@@ -106,20 +77,28 @@ export class MetaverseService {
         );
     }
 
-    async getCurrentAstralObjects() {
+    async getCurrentAstralObjects(): Promise<AstralObject[]> {
         console.log("[info] getting current astral object...");
 
-        const currentMap: [][] = await this.mapService.getCurrentMap();
+        const currentMap: (AstralObject | null)[][] =
+            await this.getCurrentMap(); // Define the map as holding AstralObject or null
 
-        const result = [];
+        const result: AstralObject[] = [];
 
         for (let row = 0; row < currentMap.length; row++) {
             for (let column = 0; column < currentMap[row].length; column++) {
                 if (currentMap[row][column] !== null) {
+                    let current: any = currentMap[row][column];
                     result.push({
-                        type: 0,
-                        column: column,
-                        row: row,
+                        type: current.type,
+                        position: {
+                            column,
+                            row,
+                        },
+                        extraParams: {
+                            color: current.color,
+                            direction: current.direction,
+                        },
                     });
                 }
             }
@@ -128,22 +107,21 @@ export class MetaverseService {
         return result;
     }
 
-    async createPolyanet(position: IPosition): Promise<void> {
+    async createPolyanet({ position }: AstralObject): Promise<void> {
         await this.polyanetService.createPolyanet(position);
     }
 
-    async createSoloon(position: IPosition, color: SoloonColor): Promise<void> {
-        const result = await this.soloonService.createSoloon(position, color);
-        console.log("result", result);
+    async createSoloon({ position, extraParams }: AstralObject): Promise<void> {
+        const result = await this.soloonService.createSoloon(
+            position,
+            extraParams!.color,
+        );
 
         return result;
     }
 
-    async createCometh(
-        position: IPosition,
-        direction: ComethDirection,
-    ): Promise<void> {
-        await this.comethService.createCometh(position, direction);
+    async createCometh({ position, extraParams }: AstralObject): Promise<void> {
+        await this.comethService.createCometh(position, extraParams!.direction);
     }
 
     async deletePolyanet(position: IPosition): Promise<void> {
@@ -158,9 +136,9 @@ export class MetaverseService {
         await this.comethService.deleteCometh(position);
     }
 
-    async getGoalMap(): Promise<any> {
+    async getGoalMap(): Promise<AstralObject[]> {
         const goal = await this.mapService.getGoalMap();
-        return goal.goal;
+        return normalizeMap(goal, typeMap);
     }
     async getCurrentMap(): Promise<any> {
         const current = await this.mapService.getCurrentMap();

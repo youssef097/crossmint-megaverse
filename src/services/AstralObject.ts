@@ -1,5 +1,5 @@
 import { throttledClient } from "@client/ThrottledApiCient";
-import { AstralObjectType, IPosition } from "src/types";
+import { AstralObjectEndoints, AstralObjectType, IPosition } from "src/types";
 
 abstract class AstralObjectService {
     protected candidateId: string;
@@ -16,7 +16,7 @@ abstract class AstralObjectService {
     ): Promise<void> {
         console.log(position);
 
-        const url = `/${this.getObjectType()}`;
+        const url = `/${AstralObjectEndoints[this.getObjectType()]}`;
         const params = {
             ...position,
             candidateId: this.candidateId,
@@ -26,7 +26,7 @@ abstract class AstralObjectService {
     }
 
     protected async deleteObject(position: IPosition): Promise<void> {
-        const url = `/${this.getObjectType()}`;
+        const url = `/${AstralObjectEndoints[this.getObjectType()]}`;
         const params = { ...position, candidateId: this.candidateId };
         await throttledClient.delete(url, { data: params });
     }
