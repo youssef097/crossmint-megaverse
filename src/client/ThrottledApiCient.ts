@@ -29,7 +29,7 @@ class ThrottledAxiosClient {
                     nextRequest();
                 }
             }
-        }, 1000);
+        }, 1000 / this.maxRequestsPerSecond);
     }
 
     //cleanup
