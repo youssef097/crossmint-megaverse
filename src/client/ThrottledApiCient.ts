@@ -11,6 +11,8 @@ class ThrottledAxiosClient {
     private interval: NodeJS.Timeout | null = null;
 
     constructor(baseURL: string, maxRequestsPerSecond = 3) {
+        console.log("Instantiation");
+
         this.axiosInstance = axios.create({
             baseURL,
         });
@@ -32,25 +34,47 @@ class ThrottledAxiosClient {
         }, 1000 / this.maxRequestsPerSecond);
     }
 
-    //cleanup
+    // Cleanup
     private stopThrottler() {
         if (this.interval) {
             clearInterval(this.interval);
         }
     }
 
+    private async retry<T>(
+        fn: () => Promise<AxiosResponse<T>>,
+        retries: number = 10,
+        delayMs: number = 1500,
+    ): Promise<AxiosResponse<T>> {
+        for (let attempt = 1; attempt <= retries; attempt++) {
+            try {
+                return await fn();
+            } catch (error) {
+                console.error(`Attempt ${attempt} failed: ${error}`);
+                if (attempt < retries) {
+                    await new Promise((res) => setTimeout(res, delayMs));
+                } else {
+                    throw error;
+                }
+            }
+        }
+        throw new Error("Max retries reached");
+    }
+
     private enqueueRequest<T>(
         request: () => Promise<AxiosResponse<T>>,
     ): Promise<AxiosResponse<T>> {
         return new Promise((resolve, reject) => {
-            const processRequest = () => {
+            const processRequest = async () => {
                 this.inProgress++;
-                request()
-                    .then(resolve)
-                    .catch(reject)
-                    .finally(() => {
-                        this.inProgress--;
-                    });
+                try {
+                    const response = await this.retry(request);
+                    resolve(response);
+                } catch (error) {
+                    reject(error);
+                } finally {
+                    this.inProgress--;
+                }
             };
             this.requestQueue.push(processRequest);
         });
@@ -87,5 +111,5 @@ class ThrottledAxiosClient {
 
 export const throttledClient = new ThrottledAxiosClient(
     process.env.API_URL!,
-    1,
+    10,
 );
