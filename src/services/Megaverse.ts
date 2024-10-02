@@ -79,7 +79,7 @@ export class MegaverseService {
         }
     }
 
-    async createMetaverseFromGoal(): Promise<void> {
+    async createMegaverseFromGoal(): Promise<void> {
         const currentMap: AstralObject[] = await this.getCurrentAstralObjects();
         const goalMap: AstralObject[] = await this.getGoalMap();
 
@@ -157,7 +157,7 @@ export class MegaverseService {
     }
 
     public async clearCurrentMap(): Promise<void> {
-        console.log("[Info] Clearing Metaverse...");
+        console.log("[Info] Clearing Megaverse...");
 
         const currentAstralObjects = await this.getCurrentAstralObjects();
 

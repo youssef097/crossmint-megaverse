@@ -109,7 +109,11 @@ class ThrottledAxiosClient {
     }
 }
 
+console.log(process.env.MAX_REQUESTS_PER_SECOND);
+
+console.log(Number(process.env.MAX_REQUESTS_PER_SECOND ?? 2));
+
 export const throttledClient = new ThrottledAxiosClient(
     process.env.API_URL!,
-    Number(process.env.MAX_REQUEST_PER_SECOND) ?? 2,
+    Number(process.env.MAX_REQUESTS_PER_SECOND ?? 2) ?? 2,
 );

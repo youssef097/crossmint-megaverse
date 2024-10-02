@@ -2,13 +2,11 @@
 # Crossmint Code Challenge
 
 
-This challenge involved developing a metaverse management system that integrates various astral objects, such as Polyanets, Soloons, and Comeths, using a modular service architecture. 
-
-
+This challenge involved developing a megaverse management system that integrates various astral objects, such as Polyanets, Soloons, and Comeths, using a modular service architecture. 
 
 The project makes use of a throttled API client (ThrottledAxiosClient.ts) in addition with a retry system to deal with the limited rate limit in the API.
 
-The number request per second can be set through the environment variable
+The number request per second can be set through the environment variable:
 
 `MAX_REQUEST_PER_SECOND = 1` 
 
@@ -50,7 +48,7 @@ Interactive menu system using `prompts`library to guide users through available 
 Clone the project
 
 ```bash
-  git clone https://github.com/youssef097/crossmint-metaverse.git
+  git clone https://github.com/youssef097/crossmint-megaverse.git
 ```
 
 Clone the `.env.example` file and rename it `.env`
@@ -58,7 +56,7 @@ Clone the `.env.example` file and rename it `.env`
 Go to the project directory
 
 ```bash
-  cd crossmint-metaverse
+  cd crossmint-megaverse
 ```
 
 Install dependencies

@@ -1,6 +1,7 @@
-import { showMenu } from "@utils/menu";
 import dotenv from "dotenv";
 dotenv.config();
+
+import { showMenu } from "@utils/menu";
 
 import { megaverse } from "src/services/Megaverse";
 
@@ -18,16 +19,16 @@ import { megaverse } from "src/services/Megaverse";
                 case "create":
                     console.log("[🌌] Creating Megaverse from Goal Map...");
                     await megaverse.clearCurrentMap();
-                    await megaverse.createMetaverseFromGoal();
-                    console.log("[✅] Metaverse creation complete!");
+                    await megaverse.createMegaverseFromGoal();
+                    console.log("[✅] Megaverse creation complete!");
                     break;
 
                 case "continue":
                     console.log(
                         "[🌌] Continuing Megaverse creation from the current map...",
                     );
-                    await megaverse.createMetaverseFromGoal();
-                    console.log("[✅] Metaverse creation continued!");
+                    await megaverse.createMegaverseFromGoal();
+                    console.log("[✅] Megaverse creation continued!");
                     break;
 
                 case "clear":
