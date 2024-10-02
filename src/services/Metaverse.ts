@@ -56,25 +56,24 @@ export class MetaverseService {
         console.log(
             `[Info] Found ${currentAstralObjects.length} elements in current metaverse, clearing...`,
         );
-        await Promise.all(
-            currentAstralObjects.map(
-                async ({ position, type }: AstralObject) => {
-                    const { row, column } = position;
-                    switch (type) {
-                        case AstralObjectType.POLYANET:
-                            return await this.deletePolyanet({ column, row });
-                        case AstralObjectType.SOLOON:
-                            return await this.deleteSoloon({ column, row });
-                        case AstralObjectType.COMETH:
-                            return await this.deleteCometh({ column, row });
+        for (const { position, type } of currentAstralObjects) {
+            const { row, column } = position;
+            switch (type) {
+                case AstralObjectType.POLYANET:
+                    await this.deletePolyanet({ column, row });
+                    break;
+                case AstralObjectType.SOLOON:
+                    await this.deleteSoloon({ column, row });
+                    break;
+                case AstralObjectType.COMETH:
+                    await this.deleteCometh({ column, row });
+                    break;
 
-                        default:
-                            // console.log(` Type ${aO.type} not found`);
-                            return;
-                    }
-                },
-            ),
-        );
+                default:
+                    // console.log(` Type ${type} not found`);
+                    break;
+            }
+        }
     }
 
     async getCurrentAstralObjects(): Promise<AstralObject[]> {
